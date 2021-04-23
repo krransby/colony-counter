@@ -85,7 +85,7 @@ def preprocessImage(imgOri):
     cv2.createTrackbar("Process more", windowName, 0, 1, nothing)
 
     # Set default parameters
-    cv2.setTrackbarPos("Invert Plate", windowName, 0)
+    cv2.setTrackbarPos("Invert Plate", windowName, mInv)
     cv2.setTrackbarPos("Invert Mask", windowName, mInv)
     cv2.setTrackbarPos("Process more", windowName, 0)
 
@@ -407,9 +407,12 @@ def generate_output(img, count, method, filename, time):
     border = np.zeros((imageHeight, imageWidth, chan), np.uint8)
     border[:,0:imageWidth] = houghColor
 
+    # Process filename:
+    name = filename.split("/")[-1].split(".")[0]
+
     # Generate text for image
     # Filename string
-    fileStr = 'File: "{}"'.format(filename)
+    fileStr = 'File: "{}"'.format(name)
     cv2.putText(border, fileStr, (10, imageHeight-80), font, fontScale, fontCol, 1, cv2.LINE_AA)
 
     # Method used string
@@ -428,25 +431,25 @@ def generate_output(img, count, method, filename, time):
     border[10:10+height, 10:10+width] = img
 
     # Save the output file
-    output_image('output_{}_C{}'.format(method, count), border)
+    output_image('{}_{}_C{}'.format(name, method, count), border)
   
-    # csv file format
-    List = [filename, time, count, method]
+    # # csv file format
+    # List = [name, time, count, method]
     
-    # Open our existing CSV file in append mode
-    # Create a file object for this file
-    with open('data.csv', 'a') as f_object:
+    # # Open our existing CSV file in append mode
+    # # Create a file object for this file
+    # with open('data.csv', 'a') as f_object:
     
-        # Pass this file object to csv.writer()
-        # and get a writer object
-        writer_object = writer(f_object)
+    #     # Pass this file object to csv.writer()
+    #     # and get a writer object
+    #     writer_object = writer(f_object)
     
-        # Pass the list as an argument into
-        # the writerow()
-        writer_object.writerow(List)
+    #     # Pass the list as an argument into
+    #     # the writerow()
+    #     writer_object.writerow(List)
     
-        #Close the file object
-        f_object.close()
+    #     # Close the file object
+    #     f_object.close()
 
     return border
 
@@ -491,7 +494,7 @@ def main(args):
 if __name__ == '__main__':
     
     # Uncomment these lines if not running through terminal
-    args = ['counter.py', 'plate2.jpg', 'w']
+    args = ['counter.py', 'control/LQ/LB_08.tif', 'w']
     main(args)
 
     #main(sys.argv)

@@ -88,5 +88,5 @@ Project Link: [https://github.com/krransby/colony-counter](https://github.com/kr
 ## Acknowledgements
 * [University of Canterbury](https://www.canterbury.ac.nz/)
 * [Richard Green (Supervisor)](https://www.canterbury.ac.nz/engineering/contact-us/people/richard-green.html)
-* [Staphilococcus aureus colonies](http://opencfu.sourceforge.net/samples.php)
+* [Control group colony images](http://opencfu.sourceforge.net/samples.php)
 * [READEME Template](https://github.com/othneildrew/Best-README-Template)
