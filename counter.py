@@ -14,6 +14,8 @@ __status__ = "Release 1"
 import cv2
 import numpy as np
 import sys
+import time
+from csv import writer
 
 # "Globals"
 
@@ -63,6 +65,8 @@ def preprocessImage(imgOri):
 
     # Find the circular plate mask in the image
     plateMask, circle = findPlate(imgOri, imgBin)
+
+    cv2.circle(imgOri, (int(circle[0]), int(circle[1])), int(circle[2]), houghColor, 2)
 
     # Crop the original image if needed
     imgOri = crop_image(imgOri, circle)
@@ -120,8 +124,6 @@ def preprocessImage(imgOri):
         if cv2.waitKey(100) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
-    
-    cv2.circle(imgOri, (int(circle[0]), int(circle[1])), int(circle[2]), houghColor, 2)
 
     # Return the (cropped) original image and processed image
     return imgOri, imgShow
@@ -374,7 +376,7 @@ def crop_image(img, mask):
     return output
 
 
-def generate_output(img, count, method, filename):
+def generate_output(img, count, method, filename, time):
     """
     Creates a fancy output image containing the processed image,
     the filename, the method used and the number of colonies
@@ -400,7 +402,7 @@ def generate_output(img, count, method, filename):
     # Create black border:
     height, width, chan = img.shape
     bWidth = 20
-    imageHeight = height + (bWidth + 80)
+    imageHeight = height + (bWidth + 100)
     imageWidth = width + bWidth
     border = np.zeros((imageHeight, imageWidth, chan), np.uint8)
     border[:,0:imageWidth] = houghColor
@@ -408,21 +410,43 @@ def generate_output(img, count, method, filename):
     # Generate text for image
     # Filename string
     fileStr = 'File: "{}"'.format(filename)
-    cv2.putText(border, fileStr, (10, imageHeight-60), font, fontScale, fontCol, 1, cv2.LINE_AA)
+    cv2.putText(border, fileStr, (10, imageHeight-80), font, fontScale, fontCol, 1, cv2.LINE_AA)
 
     # Method used string
     methodStr = 'Method: {}'.format(methods[method.lower()])
-    cv2.putText(border, methodStr, (10, imageHeight-40), font, fontScale, fontCol, 1, cv2.LINE_AA)
+    cv2.putText(border, methodStr, (10, imageHeight-60), font, fontScale, fontCol, 1, cv2.LINE_AA)
     
     # Number of colonies string
     countStr = 'Colonies: {}'.format(count)
-    cv2.putText(border, countStr, (10, imageHeight-20), font, fontScale, fontCol, 1, cv2.LINE_AA)
+    cv2.putText(border, countStr, (10, imageHeight-40), font, fontScale, fontCol, 1, cv2.LINE_AA)
+
+    # Amount of time string
+    timeStr = 'Time: {0:.2f} s'.format(time)
+    cv2.putText(border, timeStr, (10, imageHeight-20), font, fontScale, fontCol, 1, cv2.LINE_AA)
 
     # Place output image into the border
     border[10:10+height, 10:10+width] = img
 
     # Save the output file
     output_image('output_{}_C{}'.format(method, count), border)
+  
+    # csv file format
+    List = [filename, time, count, method]
+    
+    # Open our existing CSV file in append mode
+    # Create a file object for this file
+    with open('data.csv', 'a') as f_object:
+    
+        # Pass this file object to csv.writer()
+        # and get a writer object
+        writer_object = writer(f_object)
+    
+        # Pass the list as an argument into
+        # the writerow()
+        writer_object.writerow(List)
+    
+        #Close the file object
+        f_object.close()
 
     return border
 
@@ -440,6 +464,9 @@ def main(args):
     # Load the specified image
     imgOri = load_image(args[1], 980)
 
+    # Start counting the time spent counting
+    startTime = time.time()
+
     # Preprocess the input image
     imgOri, imgPro = preprocessImage(imgOri)
 
@@ -454,7 +481,7 @@ def main(args):
         error('Undefined detection method: "{}"'.format(args[2]), 1)
     
     # Generate the output
-    output = generate_output(output, colonies, args[2], args[1])
+    output = generate_output(output, colonies, args[2], args[1], (time.time() - startTime))
 
     # Visualize the final image
     cv2.imshow('Final Result: {} Colonies found'.format(colonies), output)
@@ -464,7 +491,7 @@ def main(args):
 if __name__ == '__main__':
     
     # Uncomment these lines if not running through terminal
-    #args = ['counter.py', 'plate2.jpg', 'h']
-    #main(args)
+    args = ['counter.py', 'plate2.jpg', 'w']
+    main(args)
 
-    main(sys.argv)
+    #main(sys.argv)
