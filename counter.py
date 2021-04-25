@@ -24,6 +24,8 @@ houghColor = (0, 0, 255) # colour used to identify colonies
 # function for outputing images
 output_image = (lambda n, v: cv2.imwrite('outputs/' + n + '.png', v))
 
+DEBUG = False
+
 
 def preprocessImage(imgOri):
     """
@@ -52,16 +54,28 @@ def preprocessImage(imgOri):
     sharp = np.float32(imgOri)
     imgResult = sharp - imgLap
 
+    # Save the sharpened image
+    if DEBUG: output_image("sharpened.png", imgResult)
+
     # Convert back to 8bits gray scale
     imgResult = np.clip(imgResult, 0, 255)
     imgResult = imgResult.astype('uint8')
     imgGray = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY)
 
+    # Save the greyscale image
+    if DEBUG: output_image("greyscale.png", imgGray)
+
     # Binarize the greyscale image
     _, imgBin = cv2.threshold(imgGray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
+    # Save the binary image
+    if DEBUG: output_image("binary.png", imgBin)
+
     # Remove noise from the binary image
     imgBin = cv2.morphologyEx(imgBin, cv2.MORPH_OPEN, np.ones((3, 3), dtype=int))
+
+    # Save the noise reduced binary image
+    if DEBUG: output_image("noise_reduction.png", imgBin)
 
     # Find the circular plate mask in the image
     plateMask, circle = findPlate(imgOri, imgBin)
@@ -124,6 +138,9 @@ def preprocessImage(imgOri):
         if cv2.waitKey(100) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
+    
+    # Save the preprocessed image
+    if DEBUG: output_image("preprocessed.png", imgShow)
 
     # Return the (cropped) original image and processed image
     return imgOri, imgShow
@@ -432,24 +449,26 @@ def generate_output(img, count, method, filename, time):
 
     # Save the output file
     output_image('{}_{}_C{}'.format(name, method, count), border)
-  
-    # # csv file format
-    # List = [name, time, count, method]
     
-    # # Open our existing CSV file in append mode
-    # # Create a file object for this file
-    # with open('data.csv', 'a') as f_object:
-    
-    #     # Pass this file object to csv.writer()
-    #     # and get a writer object
-    #     writer_object = writer(f_object)
-    
-    #     # Pass the list as an argument into
-    #     # the writerow()
-    #     writer_object.writerow(List)
-    
-    #     # Close the file object
-    #     f_object.close()
+    # Save data to .csv file
+    if DEBUG:
+        # csv file format
+        List = [name, time, count, method]
+        
+        # Open our existing CSV file in append mode
+        # Create a file object for this file
+        with open('data.csv', 'a') as f_object:
+        
+            # Pass this file object to csv.writer()
+            # and get a writer object
+            writer_object = writer(f_object)
+        
+            # Pass the list as an argument into
+            # the writerow()
+            writer_object.writerow(List)
+        
+            # Close the file object
+            f_object.close()
 
     return border
 
@@ -494,7 +513,7 @@ def main(args):
 if __name__ == '__main__':
     
     # Uncomment these lines if not running through terminal
-    args = ['counter.py', 'control/LQ/LB_08.tif', 'w']
-    main(args)
+    #args = ['counter.py', 'plate2.jpg', 'w']
+    #main(args)
 
-    #main(sys.argv)
+    main(sys.argv)
