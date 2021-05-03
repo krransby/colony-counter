@@ -26,16 +26,17 @@ convert_time <- function(sec) {
   return(output)
 }
 
+
 # Get accuracy data for Hough Circle method
 houghMean <- c(convert_time(mean(HQHough$Time)), sprintf("%.2f", mean(HQHough$Colonies) / mean(hand$Colonies)), sprintf("%.2f", mean(HQHough$FalsePos)), sprintf("%.2f", mean(HQHough$FalseNeg)))
-houghMin <- c(convert_time(min(HQHough$Time)), sprintf("%.2f", min(HQHough$Colonies) / min(hand$Colonies)), min(HQHough$FalsePos), min(HQHough$FalseNeg))
-houghMax <- c(convert_time(max(HQHough$Time)), sprintf("%.2f", max(HQHough$Colonies) / max(hand$Colonies)), max(HQHough$FalsePos), max(HQHough$FalseNeg))
+houghMin <- c(convert_time(min(HQHough$Time)), sprintf("%.2f", min(HQHough$Colonies / hand$Colonies)), min(HQHough$FalsePos), min(HQHough$FalseNeg))
+houghMax <- c(convert_time(max(HQHough$Time)), sprintf("%.2f", max(HQHough$Colonies / hand$Colonies)), max(HQHough$FalsePos), max(HQHough$FalseNeg))
 houghData <- matrix(c(houghMean, houghMin, houghMax), nrow = 3, byrow = TRUE, dimnames = list(c("Mean", "Min", "Max"), c("time", "Accuracy", "FPR", "FNR")))
 
 # Get accuracy data for Watershed method
 waterMean <- c(convert_time(mean(HQwater$Time)), sprintf("%.2f", mean(HQwater$Colonies) / mean(hand$Colonies)), sprintf("%.2f", mean(HQwater$FalsePos)), sprintf("%.2f", mean(HQwater$FalseNeg)))
-waterMin <- c(convert_time(min(HQwater$Time)), sprintf("%.2f", min(HQwater$Colonies) / min(hand$Colonies)), min(HQwater$FalsePos), min(HQwater$FalseNeg))
-waterMax <- c(convert_time(max(HQwater$Time)), sprintf("%.2f", max(HQwater$Colonies) / max(hand$Colonies)), max(HQwater$FalsePos), max(HQwater$FalseNeg))
+waterMin <- c(convert_time(min(HQwater$Time)), sprintf("%.2f", min(HQwater$Colonies / hand$Colonies)), min(HQwater$FalsePos), min(HQwater$FalseNeg))
+waterMax <- c(convert_time(max(HQwater$Time)), sprintf("%.2f", max(HQwater$Colonies / hand$Colonies)), max(HQwater$FalsePos), max(HQwater$FalseNeg))
 waterData <- matrix(c(waterMean, waterMin, waterMax), nrow = 3, byrow = TRUE, dimnames = list(c("Mean", "Min", "Max"), c("time", "Accuracy", "FPR", "FNR")))
 
 # Display outputs
