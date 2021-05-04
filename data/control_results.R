@@ -6,6 +6,12 @@ HQwater <- read.csv("data_HQ_water.csv", header = T)
 # X range to use for plotting
 x <- seq(1:19)
 
+# colours to use in plots
+purple <- rgb(0.78, 0.2, 1, 1)
+purple_soft <- rgb(0.78, 0.2, 1, 0.25)
+orange <- rgb(1, 0.74, 0.1, 1)
+orange_soft <- rgb(1, 0.74, 0.1, 0.25)
+
 # Convert from seconds to MM:SS.MS format
 convert_time <- function(sec) {
   
@@ -39,47 +45,103 @@ waterMin <- c(convert_time(min(HQwater$Time)), sprintf("%.2f", min(HQwater$Colon
 waterMax <- c(convert_time(max(HQwater$Time)), sprintf("%.2f", max(HQwater$Colonies / hand$Colonies)), max(HQwater$FalsePos), max(HQwater$FalseNeg))
 waterData <- matrix(c(waterMean, waterMin, waterMax), nrow = 3, byrow = TRUE, dimnames = list(c("Mean", "Min", "Max"), c("time", "Accuracy", "FPR", "FNR")))
 
-# Display outputs
+# Display output matrices
 houghData
 waterData
 
 
-# Plot the time taken (in minutes) by each method
-# 1. Open png file
-png("images/time_taken.png", width = 1000, height = 562.5)
+# Output image (complex): ====================================================================================================================================================================================
 
-# 2. Create the plot
-plot(x, HQwater$Time/60, xaxt="n", type = "l", lwd = 2, col = rgb(0.5, 1, 0.5, 1), ylim = c(0,13), main = "Time taken by each method", xlab = "Test", ylab = "Time (minutes)")
+# 1. Open output file
+#png("images/control_data.png", width = 1000, height = 1615)
+svg("images/control_data.svg", width = 8, height = 8)
+
+# set image layout
+layout(matrix(c(1,1,2,2), 2, 2, byrow = TRUE))
+
+# time ------------------------------------
+plot(x, HQwater$Time/60, xaxt="n", type = "l", lwd = 2, col = purple, ylim = c(0,13), main = "Time taken by each method", xlab = "Test", ylab = "Time (minutes)")
 axis(1, at = x)
-lines(x, HQHough$Time/60, lwd = 2, col = rgb(1, 0.5, 1, 1))
+lines(x, HQHough$Time/60, lwd = 2, col = orange)
 lines(x, hand$Time/60, lwd = 1, lty = 2, col = rgb(0, 0, 0, 1))
-legend("topright", inset = 0.01, col = c(rgb(0, 0, 0, 1), rgb(0.5, 1, 0.5, 1), rgb(1, 0.5, 1, 1)), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), purple, orange), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
+
+
+# both accuracy ------------------------------------
+plot(x, HQwater$Colonies, xaxt="n", type = "l", lwd = 2, xlim = c(1,19), ylim = c(0, 1400), col = orange, main = "Number of colonies enumerated by each method (with error rates)", xlab = "Test", ylab = "Number of enumerated Colonies")
+axis(1, at = x)
+# plot water error rate
+upperBoundry = HQwater$Colonies + (abs(hand$Colonies - HQwater$Colonies) + HQwater$FalsePos)
+lowerBoundry = HQwater$Colonies - (abs(hand$Colonies - HQwater$Colonies) - HQwater$FalseNeg)
+polygon(c(x, rev(x)), c(upperBoundry, rev(lowerBoundry)), col = orange_soft, border = NA)
+# plot hough error rate
+upperBoundry = HQHough$Colonies + (abs(hand$Colonies - HQHough$Colonies) + HQHough$FalsePos)
+lowerBoundry = HQHough$Colonies - (abs(hand$Colonies - HQHough$Colonies) - HQHough$FalseNeg)
+polygon(c(x, rev(x)), c(upperBoundry, rev(lowerBoundry)), col = purple_soft, border = NA)
+lines(x, HQHough$Colonies, lwd = 2, col = purple)
+# hand count
+lines(x, hand$Colonies, lwd = 1, lty = 2, col = rgb(0, 0, 0, 1))
+# legend
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, orange_soft, purple, purple_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
 
 # 3. Close the file
 dev.off()
 
 
-# Plot the error ranges and total number of colonies found by each method
-# 1. Open png file
-png("images/error_rates.png", width = 1000, height = 562.5)
+# Output image (simple): ====================================================================================================================================================================================
 
-# 2. Create the plot
-plot(x, HQwater$Colonies, xaxt="n", type = "l", lwd = 2, xlim = c(1,19), ylim = c(0, 1400), col = rgb(0.5, 1, 0.5, 1), main = "Number of colonies enumerated by each method (with error rates)", xlab = "Test", ylab = "Number of enumerated Colonies")
-axis(1, at = x)
-# plot water error rate
-upperBoundry = HQwater$Colonies + (abs(hand$Colonies - HQwater$Colonies) + HQwater$FalsePos)
-lowerBoundry = HQwater$Colonies - (abs(hand$Colonies - HQwater$Colonies) - HQwater$FalseNeg)
-polygon(c(x, x, min(x), min(x), max(x), max(x)), c(upperBoundry, lowerBoundry, upperBoundry[1], lowerBoundry[1], upperBoundry[19], lowerBoundry[19]), col = rgb(0.5, 1, 0.5, 0.25), border = NA)
+tempHand <- hand[order(hand$Colonies),]
+tempHough <- HQHough[order(HQHough$Colonies),]
+tempWater <- HQwater[order(HQwater$Colonies),]
 
-# plot hough error rate
-upperBoundry = HQHough$Colonies + (abs(hand$Colonies - HQHough$Colonies) + HQHough$FalsePos)
-lowerBoundry = HQHough$Colonies - (abs(hand$Colonies - HQHough$Colonies) - HQHough$FalseNeg)
-polygon(c(x, x, min(x), min(x), max(x), max(x)), c(upperBoundry, lowerBoundry, upperBoundry[1], lowerBoundry[1], upperBoundry[19], lowerBoundry[19]), col = rgb(1, 0.5, 1, 0.25), border = NA)
-lines(x, HQHough$Colonies, lwd = 2, col = rgb(1, 0.5, 1, 1))
+svg("images/control_data.svg", width = 10, height = 6)
 
-lines(x, hand$Colonies, lwd = 1, lty = 2, col = rgb(0, 0, 0, 1))
+layout(matrix(c(1,2), 1, 2, byrow = TRUE))
 
-legend("topright", inset = 0.01, col = c(rgb(0, 0, 0, 1), rgb(0.5, 1, 0.5, 1), rgb(0.5, 1, 0.5, 0.25), rgb(1, 0.5, 1, 1), rgb(1, 0.5, 1, 0.25)), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
+# make plot square
+par(pty="s")
+
+# ERROR RATES: =====================================================================
+plot(tempHand$Colonies, tempHand$Colonies, type = "l", lty = 2, xlim = c(0, 1200), ylim = c(0, 1200), main = "Method error rates", xlab = "Number of colonies present", ylab = "Enumerated colonies")
+
+# limit lines between 0 - 1200
+clip(min(0), max(1200), min(0), max(1200))
+
+# WATERSHED TRANSFORM: =================================================
+polygon(c(0, 1200, 1200), c(0,#min(lm(HQwater$Colonies~hand$Colonies)$fitted.values),
+                            max(lm(HQwater$Colonies+(HQwater$FalsePos+HQwater$FalseNeg)~hand$Colonies)$fitted.values),
+                            max(lm(HQwater$Colonies-(HQwater$FalsePos+HQwater$FalseNeg)~hand$Colonies)$fitted.values)), col = orange_soft, border = NA)
+
+# middle
+#points(hand$Colonies, HQwater$Colonies, col = purple)
+#abline(lm(HQwater$Colonies~hand$Colonies), col = purple)
+lines(x = c(0, 1200), y = c(0, max(lm(HQwater$Colonies~hand$Colonies)$fitted.values)), lwd = 2, col = orange)
+
+
+# HOUGH CIRCLE TRANSFORM: =================================================
+polygon(c(0, 1200, 1200), c(min(lm(HQHough$Colonies~hand$Colonies)$fitted.values),
+                            max(lm(HQHough$Colonies+(HQHough$FalsePos+HQHough$FalseNeg)~hand$Colonies)$fitted.values),
+                            max(lm(HQHough$Colonies-(HQHough$FalsePos+HQHough$FalseNeg)~hand$Colonies)$fitted.values)), col = purple_soft, border = NA)
+# middle
+#points(hand$Colonies, HQHough$Colonies, col = orange)
+abline(lm(HQHough$Colonies~hand$Colonies), lwd = 2, col = purple)
+
+# actual number of colonies
+lines(tempHand$Colonies, tempHand$Colonies, lty = 2)
+
+# Legend
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, orange_soft, purple, purple_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
+
+
+# TIME TAKEN: =====================================================================
+plot(tempHand$Colonies, lm(tempHand$Time/60~tempHand$Colonies)$fitted.values, type = "l", lty = 2, main = "Method processing time", xlab = "Number of colonies present", ylab = "Time (minutes)")
+
+clip(min(0), max(1200), min(0), max(tempHand$Time)/60)
+
+abline(lm(tempWater$Time/60~tempHand$Colonies), lwd = 2, col = orange)
+abline(lm(tempHough$Time/60~tempHand$Colonies), lwd = 2, col = purple)
+
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, purple), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
 
 # 3. Close the file
 dev.off()
