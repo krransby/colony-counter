@@ -90,9 +90,22 @@ dev.off()
 
 # Output image (simple): ====================================================================================================================================================================================
 
+freedom <- 4
+
 tempHand <- hand[order(hand$Colonies),]
 tempHough <- HQHough[order(HQHough$Colonies),]
 tempWater <- HQwater[order(HQwater$Colonies),]
+
+trueSpline <- smooth.spline(tempHand$Colonies, tempHand$Colonies, keep.data = FALSE, df = freedom)
+trueTimeSpline <- smooth.spline(tempHand$Colonies, tempHand$Time/60, keep.data = FALSE, df = freedom)
+
+waterSpline <- smooth.spline(tempHand$Colonies, tempWater$Colonies, keep.data = FALSE, df = freedom)
+waterSplineUpper <- smooth.spline(tempHand$Colonies, tempWater$Colonies+(tempWater$FalsePos+tempWater$FalseNeg), keep.data = FALSE, df = freedom)
+waterSplineLower <- smooth.spline(tempHand$Colonies, tempWater$Colonies-(tempWater$FalsePos+tempWater$FalseNeg), keep.data = FALSE, df = freedom)
+
+houghSpline <- smooth.spline(tempHand$Colonies, tempHough$Colonies, keep.data = FALSE, df = freedom)
+houghSplineUpper <- smooth.spline(tempHand$Colonies, tempHough$Colonies+(tempHough$FalsePos+tempHough$FalseNeg), keep.data = FALSE, df = freedom)
+houghSplineLower <- smooth.spline(tempHand$Colonies, tempHough$Colonies-(tempHough$FalsePos+tempHough$FalseNeg), keep.data = FALSE, df = freedom)
 
 svg("images/control_data.svg", width = 10, height = 6)
 
@@ -108,38 +121,31 @@ plot(tempHand$Colonies, tempHand$Colonies, type = "l", lty = 2, xlim = c(0, 1200
 clip(min(0), max(1200), min(0), max(1200))
 
 # WATERSHED TRANSFORM: =================================================
-polygon(c(0, 1200, 1200), c(0,#min(lm(HQwater$Colonies~hand$Colonies)$fitted.values),
-                            max(lm(HQwater$Colonies+(HQwater$FalsePos+HQwater$FalseNeg)~hand$Colonies)$fitted.values),
-                            max(lm(HQwater$Colonies-(HQwater$FalsePos+HQwater$FalseNeg)~hand$Colonies)$fitted.values)), col = orange_soft, border = NA)
-
-# middle
-#points(hand$Colonies, HQwater$Colonies, col = purple)
-#abline(lm(HQwater$Colonies~hand$Colonies), col = purple)
-lines(x = c(0, 1200), y = c(0, max(lm(HQwater$Colonies~hand$Colonies)$fitted.values)), lwd = 2, col = orange)
-
+# error rate:
+polygon(c(0, waterSplineUpper$x, max(waterSplineUpper$x), rev(waterSplineLower$x)), c(min(waterSplineUpper$y), waterSplineUpper$y, max(waterSplineUpper$y), rev(waterSplineLower$y)), col = orange_soft, border = NA)
+# colonies counted:
+lines(waterSpline, lwd = 2, col = orange)
 
 # HOUGH CIRCLE TRANSFORM: =================================================
-polygon(c(0, 1200, 1200), c(min(lm(HQHough$Colonies~hand$Colonies)$fitted.values),
-                            max(lm(HQHough$Colonies+(HQHough$FalsePos+HQHough$FalseNeg)~hand$Colonies)$fitted.values),
-                            max(lm(HQHough$Colonies-(HQHough$FalsePos+HQHough$FalseNeg)~hand$Colonies)$fitted.values)), col = purple_soft, border = NA)
-# middle
-#points(hand$Colonies, HQHough$Colonies, col = orange)
-abline(lm(HQHough$Colonies~hand$Colonies), lwd = 2, col = purple)
+# error rate:
+polygon(c(0, houghSplineUpper$x, max(houghSplineUpper$x), rev(houghSplineLower$x)), c(min(houghSplineUpper$y), houghSplineUpper$y, max(houghSplineUpper$y), rev(houghSplineLower$y)), col = purple_soft, border = NA)
+# colonies counted:
+lines(houghSpline, lwd = 2, col = purple)
 
-# actual number of colonies
-lines(tempHand$Colonies, tempHand$Colonies, lty = 2)
+# "True" number of colonies
+lines(trueSpline, lty = 2)
 
 # Legend
 legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, orange_soft, purple, purple_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
 
 
 # TIME TAKEN: =====================================================================
-plot(tempHand$Colonies, lm(tempHand$Time/60~tempHand$Colonies)$fitted.values, type = "l", lty = 2, main = "Method processing time", xlab = "Number of colonies present", ylab = "Time (minutes)")
+plot(trueTimeSpline, type = "l", lty = 2, main = "Method processing time", xlab = "Number of colonies present", ylab = "Time (minutes)")
 
 clip(min(0), max(1200), min(0), max(tempHand$Time)/60)
 
-abline(lm(tempWater$Time/60~tempHand$Colonies), lwd = 2, col = orange)
-abline(lm(tempHough$Time/60~tempHand$Colonies), lwd = 2, col = purple)
+lines(smooth.spline(tempHand$Colonies, tempWater$Time/60, keep.data = FALSE, df = freedom), lwd = 2, col = orange)
+lines(smooth.spline(tempHand$Colonies, tempHough$Time/60, keep.data = FALSE, df = freedom), lwd = 2, col = purple)
 
 legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, purple), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
 
