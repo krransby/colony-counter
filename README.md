@@ -22,7 +22,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<img src="outputs/examples/hough_ex.png" width="600"> <img src="outputs/examples/water_ex.png" width="600"> 
+<img src="demo/hough_demo.gif" width="480" height="480"> <img src="demo/hough_ex.png" width="460"> 
+
+<img src="demo/water_demo.gif" width="480" height="480"> <img src="demo/water_ex.png" width="460"> 
 
 
 This project proposes a method to aid in the enumeration of bacterial colonies present on an agar plate through use of preprocessing techniques, the Hough Circle Transform and the Watershed Transform.

@@ -1,5 +1,5 @@
 # Load data from .csv files
-hand <- read.csv("data_HQ_LQ_hand.csv", header = T)
+hand <- read.csv("data_HQ_hand.csv", header = T)
 HQHough <- read.csv("data_HQ_hough.csv", header = T)
 HQwater <- read.csv("data_HQ_water.csv", header = T)
 
