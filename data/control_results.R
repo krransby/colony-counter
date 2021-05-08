@@ -1,10 +1,7 @@
 # Load data from .csv files
-hand <- read.csv("data_HQ_hand.csv", header = T)
+HQHand <- read.csv("data_HQ_hand.csv", header = T)
 HQHough <- read.csv("data_HQ_hough.csv", header = T)
-HQwater <- read.csv("data_HQ_water.csv", header = T)
-
-# X range to use for plotting
-x <- seq(1:19)
+HQWater <- read.csv("data_HQ_water.csv", header = T)
 
 # colours to use in plots
 purple <- rgb(0.78, 0.2, 1, 1)
@@ -34,15 +31,15 @@ convert_time <- function(sec) {
 
 
 # Get accuracy data for Hough Circle method
-houghMean <- c(convert_time(mean(HQHough$Time)), sprintf("%.2f", mean(HQHough$Colonies) / mean(hand$Colonies)), sprintf("%.2f", mean(HQHough$FalsePos)), sprintf("%.2f", mean(HQHough$FalseNeg)))
-houghMin <- c(convert_time(min(HQHough$Time)), sprintf("%.2f", min(HQHough$Colonies / hand$Colonies)), min(HQHough$FalsePos), min(HQHough$FalseNeg))
-houghMax <- c(convert_time(max(HQHough$Time)), sprintf("%.2f", max(HQHough$Colonies / hand$Colonies)), max(HQHough$FalsePos), max(HQHough$FalseNeg))
+houghMean <- c(convert_time(mean(HQHough$Time)), sprintf("%.2f", mean(HQHough$Colonies) / mean(HQHand$Colonies)), sprintf("%.2f", mean(HQHough$FalsePos)), sprintf("%.2f", mean(HQHough$FalseNeg)))
+houghMin <- c(convert_time(min(HQHough$Time)), sprintf("%.2f", min(HQHough$Colonies / HQHand$Colonies)), min(HQHough$FalsePos), min(HQHough$FalseNeg))
+houghMax <- c(convert_time(max(HQHough$Time)), sprintf("%.2f", max(HQHough$Colonies / HQHand$Colonies)), max(HQHough$FalsePos), max(HQHough$FalseNeg))
 houghData <- matrix(c(houghMean, houghMin, houghMax), nrow = 3, byrow = TRUE, dimnames = list(c("Mean", "Min", "Max"), c("time", "Accuracy", "FPR", "FNR")))
 
 # Get accuracy data for Watershed method
-waterMean <- c(convert_time(mean(HQwater$Time)), sprintf("%.2f", mean(HQwater$Colonies) / mean(hand$Colonies)), sprintf("%.2f", mean(HQwater$FalsePos)), sprintf("%.2f", mean(HQwater$FalseNeg)))
-waterMin <- c(convert_time(min(HQwater$Time)), sprintf("%.2f", min(HQwater$Colonies / hand$Colonies)), min(HQwater$FalsePos), min(HQwater$FalseNeg))
-waterMax <- c(convert_time(max(HQwater$Time)), sprintf("%.2f", max(HQwater$Colonies / hand$Colonies)), max(HQwater$FalsePos), max(HQwater$FalseNeg))
+waterMean <- c(convert_time(mean(HQWater$Time)), sprintf("%.2f", mean(HQWater$Colonies) / mean(HQHand$Colonies)), sprintf("%.2f", mean(HQWater$FalsePos)), sprintf("%.2f", mean(HQWater$FalseNeg)))
+waterMin <- c(convert_time(min(HQWater$Time)), sprintf("%.2f", min(HQWater$Colonies / HQHand$Colonies)), min(HQWater$FalsePos), min(HQWater$FalseNeg))
+waterMax <- c(convert_time(max(HQWater$Time)), sprintf("%.2f", max(HQWater$Colonies / HQHand$Colonies)), max(HQWater$FalsePos), max(HQWater$FalseNeg))
 waterData <- matrix(c(waterMean, waterMin, waterMax), nrow = 3, byrow = TRUE, dimnames = list(c("Mean", "Min", "Max"), c("time", "Accuracy", "FPR", "FNR")))
 
 # Display output matrices
@@ -50,51 +47,13 @@ houghData
 waterData
 
 
-# Output image (complex): ====================================================================================================================================================================================
-
-# 1. Open output file
-#png("images/control_data.png", width = 1000, height = 1615)
-svg("images/control_data.svg", width = 8, height = 8)
-
-# set image layout
-layout(matrix(c(1,1,2,2), 2, 2, byrow = TRUE))
-
-# time ------------------------------------
-plot(x, HQwater$Time/60, xaxt="n", type = "l", lwd = 2, col = purple, ylim = c(0,13), main = "Time taken by each method", xlab = "Test", ylab = "Time (minutes)")
-axis(1, at = x)
-lines(x, HQHough$Time/60, lwd = 2, col = orange)
-lines(x, hand$Time/60, lwd = 1, lty = 2, col = rgb(0, 0, 0, 1))
-legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), purple, orange), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
-
-
-# both accuracy ------------------------------------
-plot(x, HQwater$Colonies, xaxt="n", type = "l", lwd = 2, xlim = c(1,19), ylim = c(0, 1400), col = orange, main = "Number of colonies enumerated by each method (with error rates)", xlab = "Test", ylab = "Number of enumerated Colonies")
-axis(1, at = x)
-# plot water error rate
-upperBoundry = HQwater$Colonies + (abs(hand$Colonies - HQwater$Colonies) + HQwater$FalsePos)
-lowerBoundry = HQwater$Colonies - (abs(hand$Colonies - HQwater$Colonies) - HQwater$FalseNeg)
-polygon(c(x, rev(x)), c(upperBoundry, rev(lowerBoundry)), col = orange_soft, border = NA)
-# plot hough error rate
-upperBoundry = HQHough$Colonies + (abs(hand$Colonies - HQHough$Colonies) + HQHough$FalsePos)
-lowerBoundry = HQHough$Colonies - (abs(hand$Colonies - HQHough$Colonies) - HQHough$FalseNeg)
-polygon(c(x, rev(x)), c(upperBoundry, rev(lowerBoundry)), col = purple_soft, border = NA)
-lines(x, HQHough$Colonies, lwd = 2, col = purple)
-# hand count
-lines(x, hand$Colonies, lwd = 1, lty = 2, col = rgb(0, 0, 0, 1))
-# legend
-legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, orange_soft, purple, purple_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
-
-# 3. Close the file
-dev.off()
-
-
 # Output image (simple): ====================================================================================================================================================================================
 
 freedom <- 4
 
-tempHand <- hand[order(hand$Colonies),]
+tempHand <- HQHand[order(HQHand$Colonies),]
 tempHough <- HQHough[order(HQHough$Colonies),]
-tempWater <- HQwater[order(HQwater$Colonies),]
+tempWater <- HQWater[order(HQWater$Colonies),]
 
 trueSpline <- smooth.spline(tempHand$Colonies, tempHand$Colonies, keep.data = FALSE, df = freedom)
 trueTimeSpline <- smooth.spline(tempHand$Colonies, tempHand$Time/60, keep.data = FALSE, df = freedom)
@@ -136,7 +95,7 @@ lines(houghSpline, lwd = 2, col = purple)
 lines(trueSpline, lty = 2)
 
 # Legend
-legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, orange_soft, purple, purple_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Watershed colonies", "Watershed error rate", "Hough Circle colonies", "Hough Circle error rate"))
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), purple, purple_soft, orange, orange_soft), lwd = c(1, 2, NA, 2, NA), lty = c(2, 1, NA, 1, NA), pch = c(NA, NA, 15, NA, 15), legend = c("True colonies", "Hough Circle colonies", "Hough Circle error rate", "Watershed colonies", "Watershed error rate"))
 
 
 # TIME TAKEN: =====================================================================
@@ -147,7 +106,7 @@ clip(min(0), max(1200), min(0), max(tempHand$Time)/60)
 lines(smooth.spline(tempHand$Colonies, tempWater$Time/60, keep.data = FALSE, df = freedom), lwd = 2, col = orange)
 lines(smooth.spline(tempHand$Colonies, tempHough$Time/60, keep.data = FALSE, df = freedom), lwd = 2, col = purple)
 
-legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), orange, purple), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Watershed Transform", "Hough Circle Transform"))
+legend("topleft", inset = 0.02, bty = "n", col = c(rgb(0, 0, 0, 1), purple, orange), lwd = c(1, 2, 2), lty = c(2, 1, 1), legend = c("Hand counting", "Hough Circle Transform", "Watershed Transform"))
 
 # 3. Close the file
 dev.off()
