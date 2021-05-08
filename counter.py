@@ -11,7 +11,7 @@
 __author__ = "Kayle Ransby - 34043590"
 __credits__ = ["Kayle Ransby", "Richard Green"]
 __version__ = "3.1.0"
-__license__ = "MIT"
+__license__ = "???"
 
 # Imports
 
@@ -322,7 +322,7 @@ def nothing(_):
     """
     Callback function for the createTrackbar function;
     this does nothing.
-    @param x: no purpose.
+    @param _: no purpose.
     """
 
     pass # Nothing
@@ -527,6 +527,6 @@ if __name__ == '__main__':
 
     # Uncomment this line if not running through terminal,
     # only change the second and third elements
-    main(['counter.py', 'plate2.jpg', 'w'])
+    #main(['counter.py', 'plate2.jpg', 'w'])
 
-    #main(sys.argv)
+    main(sys.argv)
