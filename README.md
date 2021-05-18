@@ -15,7 +15,7 @@
 
 This repository contains the scrypt, data and outputs used in my project for the COSC428: Comuter Vision paper at the University of Canterbury (21S1).
 
-The University of Canterbury internal paper can be found <a href="#">here</a> for more context.
+The University of Canterbury internal paper can be found [here](#) for more context.
 
 **TL;DR:** This project proposes a method to aid in the enumeration of bacterial colonies present on agar plates through use of preprocessing techniques, the Hough Circle Transform and the Watershed Transform.
 
@@ -55,7 +55,19 @@ Like so:
   ./counter.py plate1.jpg h
   ```
 
+If you'd prefer not to use the console, you can use the following call to main:
 
+```python
+if __name__ == '__main__':
+
+    # Uncomment this line if not running through terminal,
+    # only change the second and third elements
+    main(['counter.py', 'plate1.jpg', 'h'])
+
+    #main(sys.argv)
+```
+
+The script will run the same using this method, whatever is easier.
 
 
 <!-- CONTACT -->
@@ -75,5 +87,5 @@ Report Link: [Coming soon](#)
 * [University of Canterbury](https://www.canterbury.ac.nz/)
 * [Richard Green (Supervisor)](https://www.canterbury.ac.nz/engineering/contact-us/people/richard-green.html)
 * [images/HQ](http://opencfu.sourceforge.net/samples.php)
-* [plate1.jpg]()
-* [plate2.jpg]()
+* [plate1.jpg](https://www.fishersci.se/shop/products/malt-extract-agar-contact-plate/10026782)
+* [plate2.jpg](https://www.fishersci.se/shop/products/malt-extract-agar-4/10168882)
