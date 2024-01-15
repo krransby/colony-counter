@@ -15,7 +15,7 @@
 
 This repository contains the scrypt, data and outputs used in my project for the COSC428: Comuter Vision paper at the University of Canterbury (21S1).
 
-The University of Canterbury internal paper can be found [here](#) for more context.
+The University of Canterbury internal paper can be found [here](https://krransby.github.io/media/COSC428.pdf) for more context.
 
 **TL;DR:** This project proposes a method to aid in the enumeration of bacterial colonies present on agar plates through use of preprocessing techniques, the Hough Circle Transform and the Watershed Transform.
 
@@ -24,9 +24,15 @@ The University of Canterbury internal paper can be found [here](#) for more cont
 <!-- PREREQUISITES -->
 ## Prerequisites
 
-This script was written using the conda environment and relies on the OpenCV and numpy python libraries, so make sure you have them installed.
+This project was built on Python 3.8.18 with the following requirements: 
+- numpy 1.20.1
+- OpenCV 4.5.1.48 
 
+Both of which are specified in requirements.txt, and can be installed using the following command:
 
+```bash
+pip install -r requirements.txt
+```
 
 
 <!-- USAGE EXAMPLES -->
@@ -77,7 +83,7 @@ Kayle Ransby - krr39@uclive.ac.nz
 
 Source Code Link: [https://github.com/krransby/colony-counter](https://github.com/krransby/colony-counter)
 
-Report Link: [Coming soon](#)
+Report Link: [Here](https://krransby.github.io/media/COSC428.pdf)
 
 
 
