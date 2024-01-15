@@ -43,7 +43,7 @@ Once you have a local copy of the repository, place images of the agar plates in
 To run the scrypt, use the following command
 
   ```sh
-  ./counter.py <input-file> <method-to-use>
+  python counter.py <input-file> <method-to-use>
   ```
 
 The supported methods are:
@@ -58,7 +58,7 @@ For example, when using *"plate1.jpg"* you don't need to run the scrypt with *im
 Like so:
 
   ```sh
-  ./counter.py plate1.jpg h
+  python counter.py plate1.jpg h
   ```
 
 If you'd prefer not to use the console, you can use the following call to main:
@@ -75,6 +75,9 @@ if __name__ == '__main__':
 
 The script will run the same using this method, whatever is easier.
 
+Once you have run the script, a window will appear for you to interact with as shown in the demos.
+
+in order to progress from one "screen" to the next, you must press the **q** key on your keyboard.
 
 <!-- CONTACT -->
 ## Contact
