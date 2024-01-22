@@ -130,3 +130,6 @@ dmypy.json
 
 # codium
 .vscode/
+
+# Output directory
+outputs/

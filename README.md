@@ -26,9 +26,10 @@ The University of Canterbury internal paper can be found [here](https://krransby
 
 This project was built on Python 3.8.18 with the following requirements: 
 - numpy 1.20.1
-- OpenCV 4.5.1.48 
+- OpenCV 4.5.1.48
+- screeninfo 0.8.1 (and its associated requirements)
 
-Both of which are specified in requirements.txt, and can be installed using the following command:
+All of which are specified in requirements.txt, and can be installed using the following command:
 
 ```bash
 pip install -r requirements.txt
@@ -77,7 +78,18 @@ The script will run the same using this method, whatever is easier.
 
 Once you have run the script, a window will appear for you to interact with as shown in the demos.
 
-in order to progress from one "screen" to the next, you must press the **q** key on your keyboard.
+In order to progress from one "screen" to the next, press any key on your keyboard.
+
+Outputs will be saved into the 'outputs/' directory with the following naming convention: "\<input-file\>\_\<method-to-use\>\_C\<number-of-colonies\>.png"
+
+>**PLEASE NOTE:** Due to limitations with OpenCV's window scailing, the resolution of your images will be limited to whichever of the following is smallest:
+>- The original size of the image
+>- 980 pixels
+>- The smallest dimension of all of displayes currently connected to the system.
+>
+>This is due to the fact that OpenCV's window size is dependent on the resolution of the image passed to `cv2.imshow()`.
+>
+>Note that the original results were achieved with a static scale of 980.
 
 <!-- CONTACT -->
 ## Contact

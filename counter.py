@@ -10,7 +10,7 @@
 
 __author__ = "Kayle Ransby - 34043590"
 __credits__ = ["Kayle Ransby", "Richard Green"]
-__version__ = "3.1.0"
+__version__ = "3.1.1"
 __license__ = "???"
 
 # Imports
@@ -20,8 +20,13 @@ import time
 from csv import writer
 import cv2
 import numpy as np
+from screeninfo import get_monitors
+import os
 
 # "Globals"
+
+# Delay when keypress is not detected (milliseconds)
+waitKeyDelay = 33
 
 # Colour used to identify colonies
 houghColor = (0, 0, 255)
@@ -142,7 +147,7 @@ def preprocess_image(img_ori):
         cv2.imshow(window_name, img_show)
 
         # close the window
-        if cv2.waitKey(100) & 0xFF == ord('q'):
+        if cv2.waitKey(waitKeyDelay) != -1:
             cv2.destroyAllWindows()
             break
 
@@ -210,7 +215,7 @@ def find_plate(img_ori, img_bin):
         cv2.imshow(window_name, img_show)
 
         # Close the window
-        if cv2.waitKey(100) & 0xFF == ord('q'):
+        if cv2.waitKey(waitKeyDelay) != -1:
             cv2.destroyAllWindows()
             break
 
@@ -311,7 +316,7 @@ def hough_circle_method(img_ori, img_pro):
         cv2.imshow(window_name, img_show)
 
         # close the window
-        if cv2.waitKey(100) & 0xFF == ord('q'):
+        if cv2.waitKey(waitKeyDelay) != -1:
             cv2.destroyAllWindows()
             break
 
@@ -345,7 +350,7 @@ def load_image(filename, desired_res):
     Function to load in an input image and set the width to
     the value specified in the parameter "desired_res".
     @param filename: String, file to be opened within the 'images/' directory.
-    @param desired_res: Int., defired resolution of the input image (horizontal).
+    @param desired_res: Int., desired resolution of the input image (horizontal).
     @Returns: Scaled input image.
     """
 
@@ -357,8 +362,10 @@ def load_image(filename, desired_res):
         error('Could not open or find the image: "{}".'.format(filename), 1)
 
     # Resize the image to the specified size
-    scale = (desired_res / img_ori.shape[1])
-    img_ori = cv2.resize(img_ori, (int(img_ori.shape[1] * scale), int(img_ori.shape[0] * scale)))
+    # ONLY IF the desired resolution is smaller than our image (we don't want to upscale)
+    if desired_res < min(img_ori.shape[:2]):
+        scale = (desired_res / img_ori.shape[1])
+        img_ori = cv2.resize(img_ori, (int(img_ori.shape[1] * scale), int(img_ori.shape[0] * scale)))
 
     return img_ori
 
@@ -496,8 +503,15 @@ def main(args):
     if len(args) != 3:
         error('Incorrect number of arguments. Usage: counter.py <file> <method>', 1)
 
+    # Get screen resolution(s)
+    res = [980]
+    for mon in get_monitors():
+        res.append(mon.width)
+        res.append(mon.height)
+    imageRes = min(set(res))
+
     # Load the specified image
-    img_ori = load_image(args[1], 980)
+    img_ori = load_image(args[1], imageRes)
 
     # Start counting the time spent counting
     start_time = time.time()
@@ -515,6 +529,10 @@ def main(args):
     else:
         error('Undefined detection method: "{}"'.format(args[2]), 1)
 
+    # Create the "outputs" directory if it does not exist
+    if not os.path.exists('outputs'):
+        os.makedirs('outputs')
+
     # Generate the output
     output = generate_output(output, colonies, args[2], args[1], (time.time() - start_time))
 
@@ -527,6 +545,6 @@ if __name__ == '__main__':
 
     # Uncomment this line if not running through terminal,
     # only change the second and third elements
-    #main(['counter.py', 'plate2.jpg', 'w'])
+    main(['counter.py', 'plate2.jpg', 'w'])
 
-    main(sys.argv)
+    #main(sys.argv)
